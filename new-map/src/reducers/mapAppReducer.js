@@ -59,7 +59,8 @@ function mapAppReducer(state=initialState, action) {
             })
         case 'CANCEL_FILTER':
             return Object.assign({}, state, {
-                showFilterResults: false 
+                showFilterResults: false,
+                willEmpty: true
             })
         default:
             return state

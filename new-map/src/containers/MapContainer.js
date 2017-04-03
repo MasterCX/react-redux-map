@@ -88,8 +88,8 @@ function dataToHTML(data) {
                 + (data['NUMBER OF CYCLIST KILLED'] || 0) + '位自行车骑行者死亡,'
                 + (data['NUMBER OF CYCLIST INJURED'] || 0) + '自行车骑行者受伤。'
                 + '<br>'
-                + (data['NUMBER OF MOTORIST KILLED'] || 0) + '位自行车骑行者死亡,'
-                + (data['NUMBER OF MOTORIST INJURED'] || 0) + '位自行车骑行者受伤。'
+                + (data['NUMBER OF MOTORIST KILLED'] || 0) + '位摩托车骑行者死亡,'
+                + (data['NUMBER OF MOTORIST INJURED'] || 0) + '位摩托车骑行者受伤。'
                 + '<br>';
 
     return htmlString;
@@ -113,7 +113,8 @@ function addCircle(center, radius) {
         fillOpacity: 0.1,
         map: map,
         center: center,
-        radius: radius*1000
+        radius: radius*1000,
+        draggable: true
     };
     removeCircle();
     circle = new window.google.maps.Circle(circleConfig);
@@ -135,7 +136,8 @@ function removeCircle() {
  * Add a contains() method similar to 'cationContains' of class polygen 
  */
 window.google.maps.Circle.prototype.contains = function(latLng) {
-  return this.getBounds().contains(latLng) && window.google.maps.geometry.spherical.computeDistanceBetween(this.getCenter(), latLng) <= this.getRadius();
+  return this.getBounds().contains(latLng)
+    && window.google.maps.geometry.spherical.computeDistanceBetween(this.getCenter(), latLng) <= this.getRadius();
 }
 
 class MapContainer extends Component {
@@ -185,49 +187,83 @@ class MapContainer extends Component {
         //Check request state.
         if(!nextProps.isFetching) {
             nextProps.showFilterResults
-            ? this.showFilterData(nextProps)
-            : (removeCircle() && this.showQueryData(nextProps));
+                ? this.showFilterData(nextProps)
+                : (removeCircle() && this.showQueryData(nextProps));
         }
     }
 
-    showQueryData(nextProps) {
-        //Refresh markers
+    /**
+     * Remove all the markers and reset markers array.
+     */
+    clearMarkers() {
         markers.map(function(marker) {
             marker.setMap(null);
             marker = null;
             return true;
         })
         markers = [];
+    }
 
-        //Check data and display.
-        if(nextProps.data.length !== 0) {
-            nextProps.data.map(function(object) {
-                let position = new window.google.maps.LatLng(object.LATITUDE, object.LONGITUDE),
-                    marker = new window.google.maps.Marker({position: position, map: map});
+    /**
+     * When state.showFilterResults !== true, call this function to show query result.
+     * Note that the property 'showFilterResults' decides which function to call.
+     * Whenever props update, function 'componentWillReceiveProps()' will be fired and
+     * check 'showFilterResults'.
+     * @param {*} nextProps 
+     */
+    showQueryData(nextProps) {
+        //Clean screen.
+        this.clearMarkers();
 
-                //Bind left click event for markers:
-                //Event handler: show data details in an InfoWindow.
-                marker.addListener('click', function(){
-                    collisionDetail.setContent(dataToHTML(object));
-                    collisionDetail.open(map, marker);
-                });
-                markers.push(marker);
-                return true;
-            });
-        
-            //Show tips when data records is more than 400.
-            markers.length > 400
-                ? this.setState({snackbarShow: true, message: '记录太多了！找到了'+ markers.length + '条记录。请尝试缩小查询范围！'})
-                : (nextProps.willEmpty || this.setState({snackbarShow: true, message: '找到了'+ markers.length + '条记录。'}))
-        } else {
+        //Validation
+        //is data non-empty
+        //does query works
+        if(nextProps.data.length === 0) {
             nextProps.error
                 ? this.setState({snackbarShow: true, message: '获取数据失败！一般是服务器内部原因。'})
                 : (nextProps.willEmpty || this.setState({snackbarShow: true, message: '没有符合查询条件的结果。请检查查询条件。'}))
+            return false;
         }
+
+        //For every data element, do:
+        //1. create a marker representing it.
+        //2. add click event listener
+        //3. push marker into markers(for filter use)
+        nextProps.data.map(function(object) {
+            let position = new window.google.maps.LatLng(object.LATITUDE, object.LONGITUDE),
+                marker = new window.google.maps.Marker({position: position, map: map});
+
+            //Bind left click event for markers:
+            //Event handler: show data details in an InfoWindow.
+            marker.addListener('click', function(){
+                collisionDetail.setContent(dataToHTML(object));
+                collisionDetail.open(map, marker);
+            });
+
+            markers.push(marker);
+            return true;
+        });
+    
+        //Show tips when data records is more than 400.
+        //If data is not empty then markers won't be empty.
+        markers.length > 400
+            ? this.setState({snackbarShow: true, message: '记录太多了！找到了'+ markers.length + '条记录。请尝试缩小查询范围！'})
+            : (nextProps.willEmpty || this.setState({snackbarShow: true, message: '找到了'+ markers.length + '条记录。'}))
+        return true;
     }
 
+    /**
+     * All the filter operations are based on original query result data.
+     * Hence this app doesn't support multiple filter.
+     * After once filter, the filter button will be disabled.
+     * @param {*} nextProps 
+     */
     showFilterData(nextProps) {
-
+        //Validation:
+        //is data non-empty
+        //is filter option set
+        //is circle exists
+        console.log('showfilterdata')
         if(nextProps.data.length === 0) {
             this.setState({snackbarShow: true, message: '没有可供过滤的数据。请先进行查询。'});
             this.props.dispatch(cancelFilter());
@@ -238,14 +274,15 @@ class MapContainer extends Component {
             return;
         } 
 
-        //Refresh markers
-        markers.map(function(marker) {
-            marker.setMap(null);
-            marker = null;
-            return true;
-        });
-
-        markers = [];
+        //Clean screen.
+        this.clearMarkers();
+        
+        //For every data element, do:
+        //1. transfer data to position
+        //2. judge whether this position is in the circle
+        //3. if affirmative to last judge, create a marker.
+        //4. add event listener
+        //5. push to marker array.
         nextProps.data.map(function(object) {
             let position = new window.google.maps.LatLng(object.LATITUDE, object.LONGITUDE);
             if(circle.contains(position)) {
@@ -264,7 +301,7 @@ class MapContainer extends Component {
         //Show tips when data records is more than 400.
         if(markers.length > 0) {
             markers.length > 400
-                ? this.setState({snackbarShow: true, message: '记录太多了！找到了'+ markers.length + '条记录。请尝试缩小查询范围！'})
+                ? this.setState({snackbarShow: true, message: '记录太多了！找到了'+ markers.length + '条记录。请尝试缩小过滤范围！'})
                 : (nextProps.willEmpty || this.setState({snackbarShow: true, message: '过滤后还有'+ markers.length + '条记录。'}))
         } else {
             this.setState({snackbarShow: true, message: '没有符合过滤条件的结果。请检查过滤条件。'})

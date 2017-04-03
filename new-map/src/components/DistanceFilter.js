@@ -28,6 +28,8 @@ class DistanceFilter extends Component {
                 <p className="distance-filter-tip">
                     设置过滤范围后，您可以在地图上任意位置<strong>点击右键</strong>，得到以点击位置为中心，过滤范围为半径的圆。
                     点击过滤后，范围内的记录将被保留。
+                    <br/>
+                    您也可以<strong>拖动</strong>这个圆，放置于需要的位置，再进行过滤。
                 </p>
                 <p className="distance-filter-tip">
                     过滤操作<strong>不会</strong>修改您的查询结果，您可以点击取消过滤恢复查询结果。

@@ -15,6 +15,8 @@ import IconButton from 'material-ui/IconButton';
 import ContentAdd from 'material-ui/svg-icons/content/add';
 import MenuItem from 'material-ui/MenuItem';
 import IconMenu from 'material-ui/IconMenu';
+import Divider from 'material-ui/Divider';
+import ArrowDropRight from 'material-ui/svg-icons/navigation/chevron-left';
 
 
 export const optionStyle = {
@@ -48,7 +50,7 @@ class MenuContainer extends Component {
      
     handleQuery = () => {this.state.queryParams.boroughSelected.length !==0 && this.props.dispatch(queryData(this.state.queryParams))}
 
-    handleFilter = () => {this.props.dispatch(filterData(this.state.filterCircle))}
+    handleFilter = () => {this.props.dispatch(filterData())}
 
     cancelFilter = () => {this.props.dispatch(cancelFilter())}
 
@@ -98,7 +100,16 @@ class MenuContainer extends Component {
                      >
                      <MenuItem primaryText="按日期/地区查询" onTouchTap={this.handleToggleQuery}/>
                      <MenuItem primaryText="按地理距离过滤" onTouchTap={this.handleToggleFilter}/>
-                     <MenuItem primaryText="显示当前数据的统计图表" />
+                     <Divider />
+                     <MenuItem
+                        primaryText="显示当前数据的统计图表"
+                        leftIcon={<ArrowDropRight/>}
+                        menuItems={[
+                            <MenuItem primaryText="事故发生时间分布" />,
+                            <MenuItem primaryText="事故车辆类型" />,
+                            <MenuItem primaryText="发生事故原因" />
+                        ]}
+                     />
                      </IconMenu>
                 </div> 
             </div>
