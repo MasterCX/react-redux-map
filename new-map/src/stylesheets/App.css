@@ -1,0 +1,62 @@
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto;
+}
+
+#root {
+  width: 100%;
+  height: 100%;
+}
+
+.App {
+  width: 100%;
+  height: 100%;
+}
+
+#map-container {
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  float: left;
+  padding: 0 5px 5px 0;
+}
+
+#map {
+  width: 100%;
+  height: 100%;
+  box-shadow: 5px 5px 5px #ccc;
+}
+
+#menu-container {
+  display: flex;
+  position: absolute;
+  height: 100%;
+  right: 0px;
+}
+
+.menu-drawer {
+  width: 20%;
+}
+
+.date-filter, .borough-filter {
+  text-align: left;
+}
+
+#borough-list-loading {
+  left: 50%;
+  margin-left: -15px;
+}
+
+#menu-button {
+  position: absolute;
+  top: 5%;
+  right: 50px;
+}
+.distance-filter-tip {
+  color: #999;
+  font-size: 12pt;
+  padding: 5px;
+}

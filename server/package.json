@@ -1,0 +1,17 @@
+{
+  "name": "hapi-server",
+  "version": "1.0.0",
+  "description": "hapi-server for map app",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "author": "mingholy",
+  "license": "ISC",
+  "dependencies": {
+    "hapi": "^16.1.0",
+    "hapi-plugin-mysql": "^5.0.0",
+    "inert": "^4.1.0"
+  }
+}
