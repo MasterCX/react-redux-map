@@ -16,10 +16,10 @@ class Charts extends Component {
         if(this.props.showFilterResults) {
             //Check filteredData
             this.timeDistributionChart(this.props.filteredData);
-            this.vehicleType(this.props.filteredData);
+            this.collisionCause(this.props.filteredData);
         } else {
             this.timeDistributionChart(this.props.data);
-            this.vehicleType(this.props.data);
+            this.collisionCause(this.props.data);
         }
     }
 
@@ -142,14 +142,15 @@ class Charts extends Component {
                 orient: 'verticle',
                 x: 'left',
                 data: xTypes,
+                height: "100%"
             },
             series: [
                 {
                     name: '事故原因',
                     type: 'pie',
                     radius: ['50%', '70%'],
+                    center: ['60%', "50%"],
                     avoidLabelOverlap: false,
-                    left: '20%',
                     label: {
                         normal: {
                             show: false,
