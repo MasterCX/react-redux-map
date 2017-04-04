@@ -16,15 +16,17 @@ class Charts extends Component {
         if(this.props.showFilterResults) {
             //Check filteredData
             this.timeDistributionChart(this.props.filteredData);
+            this.vehicleType(this.props.filteredData);
             this.collisionCause(this.props.filteredData);
         } else {
             this.timeDistributionChart(this.props.data);
+            this.vehicleType(this.props.data);
             this.collisionCause(this.props.data);
         }
     }
 
     /**
-     * Create collision time distribution stastic chart.
+     * Create collision time distribution statistic chart.
      */
     timeDistributionChart = (data) => {
         let yCountData = new Array(24),
@@ -95,14 +97,71 @@ class Charts extends Component {
     }
 
     /**
-     * Create vehicle type stastic chart.
+     * Create vehicle type statistic chart.
      */
     vehicleType = (data) => {
+        let vehicleTypeSet = {},
+            formattedType = [],
+            xTypes = [];
+        
+        data.map(function(object) {
+            vehicleTypeSet[object['VEHICLE TYPE CODE 1']]
+                ? vehicleTypeSet[object['VEHICLE TYPE CODE 1']]++
+                : vehicleTypeSet[object['VEHICLE TYPE CODE 1']] = 1;
+            vehicleTypeSet[object['VEHICLE TYPE CODE 2']]
+                ? vehicleTypeSet[object['VEHICLE TYPE CODE 2']]++
+                : vehicleTypeSet[object['VEHICLE TYPE CODE 2']] = 1;
+            vehicleTypeSet[object['VEHICLE TYPE CODE 3']]
+                ? vehicleTypeSet[object['VEHICLE TYPE CODE 3']]++
+                : vehicleTypeSet[object['VEHICLE TYPE CODE 3']] = 1;
+        });
 
+        for(let key in vehicleTypeSet) {
+            xTypes.push(key);
+            formattedType.push(vehicleTypeSet[key]);
+        }
+
+        let option = {
+            title: {
+                left: 'center',
+                text: '事故车辆类型分布'
+            },
+            tooltip: {
+                trigger: 'axis',
+                axisPointer: {
+                    type: 'shadow'
+                }
+            },
+            legend: {
+                data: xTypes
+            },
+            grid: {
+                containLabel: true
+            },
+            xAxis: {
+                type: 'value',
+                boundaryGap: [0, 0.01]
+            },
+            yAxis: {
+                type: 'category',
+                data: xTypes
+            },
+            series: [
+                {
+                    name: '车辆类型',
+                    type: 'bar',
+                    data: formattedType
+                }
+            ]
+        };
+
+        let vehicleTypeChart = window.echarts.init(document.getElementById('vehicle-type-container'))
+        vehicleTypeChart.setOption(option);
+        return true;
     }
 
     /**
-     * Create collision cause stastic chart.
+     * Create collision cause statistic chart
      */
     collisionCause = (data) => {
         let collisionCause = {},
@@ -111,6 +170,7 @@ class Charts extends Component {
 
         data.map(function(object) {
             //If key 'factor' exists, value++, else set value = 1
+            //Oh god. DRY principle violated.
             collisionCause[object['CONTRIBUTING FACTOR VEHICLE 1']]
                 ? collisionCause[object['CONTRIBUTING FACTOR VEHICLE 1']]++
                 : collisionCause[object['CONTRIBUTING FACTOR VEHICLE 1']] = 1;
@@ -134,6 +194,10 @@ class Charts extends Component {
         }
 
         let option = {
+            title:{
+                left: 'center',
+                text: '事故原因统计'
+            },
             tooltip: {
                 trigger: 'item',
                 formatter: "{a} <br/>{b}: {c}({d}%)"
@@ -142,7 +206,7 @@ class Charts extends Component {
                 orient: 'verticle',
                 x: 'left',
                 data: xTypes,
-                height: "100%"
+                height: '100%'
             },
             series: [
                 {
