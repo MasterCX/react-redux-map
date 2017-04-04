@@ -1,5 +1,5 @@
 /**
- * Created by Mingholy on 2017/3/27.
+ * Created by Mingholy on 2017/3/30.
  */
 'use strict';
 
@@ -60,7 +60,7 @@ server.register(require('inert'), (err) => {
     }
 
     /**
-     * For test
+     * For test & index.
      */
     server.route({
         method: 'GET',
@@ -71,7 +71,7 @@ server.register(require('inert'), (err) => {
     });
 
     /**
-     * For borough filter option list
+     * For borough filter option list.
      */
     server.route({
         method: 'GET',
@@ -82,37 +82,10 @@ server.register(require('inert'), (err) => {
             })
         }
     });
-
+    
     /**
-     * For date filter date range
+     * For query data.
      */
-    server.route({
-        method: 'GET',
-        path: '/getDateRange',
-        handler: function (request, reply) {
-            request.app.db.query(task.getDateRange, function(err, result) {
-              reply(result);
-            })
-        }
-    });
-
-    server.route({
-        method: 'GET',
-        path: '/boroughFilter',
-        handler: function (request, reply) {
-            let params = request.query.boroughs.split(',');
-            if (params.includes('unknown')){
-                request.app.db.query(task.boroughFilterWithNull, params, function(err, result) {
-                    err ? reply(err) : reply(result);
-                })
-            } else {
-                request.app.db.query(task.boroughFilter, params, function(err, result) {
-                    err ? reply(err) : reply(result);
-                })
-            }
-        }
-    });
-
     server.route({
         method: 'GET',
         path: '/queryData',
@@ -120,27 +93,25 @@ server.register(require('inert'), (err) => {
             let params = request.query,
                 currentDate = new Date(),
                 queryString = task.queryBody + 'WHERE ' + task.dateFilter;
-            //Construct default query params
-            params.startDate = params.startDate || '1970-1-1';
-            params.dueDate = currentDate.toLocaleDateString();
 
+            //Construct default query params
+            //Set default due date as today.
+            params.startDate = params.startDate || '1970-1-1';
+            params.dueDate = params.dueDate || currentDate.toLocaleDateString();
+
+            //Borough should be selected otherwise query is not allowd at front end.
             if (params.boroughSelected) {
                 let boroughParams = params.boroughSelected.split(',');
-                console.log(boroughParams);
+                //Note that query includes null differs from query without null.
                 if (boroughParams.includes('unknown')) {
                     queryString += ' AND ' + task.boroughFilterWithNull;
                 } else {
                     queryString += ' AND ' + task.boroughFilter;
                 }
-                console.log(queryString);
-                console.log(params);
-                console.log(boroughParams);
                 request.app.db.query(queryString, [params.startDate, params.dueDate, boroughParams], function(err, result) {
                     reply(result);
                 });
             } else {
-                console.log(queryString);
-                console.log(params);
                 request.app.db.query(queryString, [params.startDate, params.dueDate], function(err, result) {
                     reply(result);
                 });
@@ -148,6 +119,9 @@ server.register(require('inert'), (err) => {
         }
     });
 
+    /**
+     * Fix 404 errors for stylesheets and bundle.js
+     */
     server.route({
         method: 'GET',
         path: '/static/css/{filename}',
