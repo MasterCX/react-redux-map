@@ -16,6 +16,7 @@ import IconMenu from 'material-ui/IconMenu';
 import MenuItem from 'material-ui/MenuItem';
 import Divider from 'material-ui/Divider';
 import Dialog from 'material-ui/Dialog';
+import Snackbar from 'material-ui/Snackbar';
 /**
  * Button and icon components.
  */
@@ -48,7 +49,9 @@ class MenuContainer extends Component {
             filterContainerShow: false,
             showStatistics: false,
             queryParams: this.props.queryParams,
-            showFilterResults: this.props.showFilterResults
+            showFilterResults: this.props.showFilterResults,
+            snackbarShow: false,
+            message: ''
         };
     }
 
@@ -56,18 +59,37 @@ class MenuContainer extends Component {
 
     handleToggleFilter = () => {this.setState({filterContainerShow: !this.state.filterContainerShow})};
     
-    handleToggleStatistics= () => {this.setState({showStatistics:!this.state.showStatistics})};
+    handleToggleStatistics = () => {
+        //Check if there is any filtered data.
+        //Note that if there is no data to show, then there is no statistic chart.
+        //If the chart exists, then data must exists.
+        //So use data existence to restrict toggle function should work.
+        if(this.props.showFilterResults) {
+            this.props.filteredData.length
+                ? this.setState({showStatistics: !this.state.showStatistics})
+                : this.setState({snackbarShow: true, message: '没有可供统计的数据，请先查询、过滤获取数据。'})
+        } else {
+            this.props.data.length
+                ? this.setState({showStatistics: !this.state.showStatistics})
+                : this.setState({snackbarShow: true, message: '没有可供统计的数据，请先查询、过滤获取数据。'})
+        }
+    }
 
     handleEmpty = () => {this.props.dispatch(emptyData())};
      
-    handleQuery = () => {this.state.queryParams.boroughSelected.length !==0 && this.props.dispatch(queryData(this.state.queryParams))};
+    handleQuery = () => {this.state.queryParams.boroughSelected.length !==0
+        && this.props.dispatch(cancelFilter())
+        && this.props.dispatch(queryData(this.state.queryParams))};
 
     handleFilter = () => {this.props.dispatch(filterData())};
 
     cancelFilter = () => {this.props.dispatch(cancelFilter())};
 
     componentWillReceiveProps(nextProps) {
-        this.setState({queryParams: nextProps.queryParams});
+        this.setState({
+            queryParams: nextProps.queryParams,
+            showFilterResults: nextProps.showFilterResults
+        });
     }
 
     render() {
@@ -133,9 +155,16 @@ class MenuContainer extends Component {
                     modal={false}
                     open={this.state.showStatistics}
                     onRequestClose={this.handleToggleStatistics}
+                    autoScrollBodyContent={true}
                 >
                     <Charts/>
                 </Dialog>
+                <Snackbar
+                    open={this.state.snackbarShow}
+                    message={this.state.message}
+                    autoHideDuration={4000}
+                    onRequestClose={() => {this.setState({snackbarShow: false})}}
+                />
             </div>
         );
     }

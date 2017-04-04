@@ -56,15 +56,24 @@ function mapAppReducer(state=initialState, action) {
                 showFilterResults: true 
             });
         case 'FILTER_SUCCESS':
-            return Object.assign({}, state, {
+            newState = Object.assign({}, state, {
                 willEmpty: false,
-                filteredData: action.filteredData
             });
+            newState.filteredData = action.filteredData;
+            return newState;
+        case 'FILTER_FAIL':
+            newState = Object.assign({}, state, {
+                showFilterResults: true
+            })
+            newState.filteredData = [];
+            return newState;
         case 'CANCEL_FILTER':
-            return Object.assign({}, state, {
+            newState = Object.assign({}, state, {
                 showFilterResults: false,
                 willEmpty: true
             });
+            newState.filteredData = [];
+            return newState;
         default:
             return state
     }

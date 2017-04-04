@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import { cancelFilter, filterSuccess } from '../actions/actions'
+import { cancelFilter, filterSuccess, filterFail } from '../actions/actions'
 import LinearProgress from 'material-ui/LinearProgress';
 import Snackbar from 'material-ui/Snackbar';
 
@@ -150,7 +150,6 @@ class MapContainer extends Component {
         this.state = {
             snackbarShow: false,
             message: '',
-            dataToHTML: this.dataToHTML,
         }
     }
 
@@ -192,8 +191,8 @@ class MapContainer extends Component {
                 : (removeCircle() && this.showQueryData(nextProps));
         }
         //Update filtered data.
-        (filteredData && filteredData.length)
-            && this.props.dispatch(filterSuccess(filteredData));
+        //(filteredData && filteredData.length)
+        //    && this.props.dispatch(filterSuccess(filteredData));
     }
 
     /**
@@ -270,7 +269,6 @@ class MapContainer extends Component {
         //is data non-empty
         //is filter option set
         //is circle exists
-        console.log('showfilterdata')
         if(nextProps.data.length === 0) {
             this.setState({snackbarShow: true, message: '没有可供过滤的数据。请先进行查询。'});
             this.props.dispatch(cancelFilter());
@@ -305,8 +303,6 @@ class MapContainer extends Component {
                 });
                 markers.push(marker);
                 filteredData.push(object);
-                console.log(object.TIME);
-                console.log(typeof object.TIME);
             }
             return true;
         });
@@ -317,8 +313,10 @@ class MapContainer extends Component {
             markers.length > 400
                 ? this.setState({snackbarShow: true, message: '记录太多了！找到了'+ markers.length + '条记录。请尝试缩小过滤范围！'})
                 : (nextProps.willEmpty || this.setState({snackbarShow: true, message: '过滤后还有'+ markers.length + '条记录。'}))
+            this.props.dispatch(filterSuccess(filteredData));
         } else {
             this.setState({snackbarShow: true, message: '没有符合过滤条件的结果。请检查过滤条件。'})
+            this.props.dispatch(filterFail());
         }
     }
 

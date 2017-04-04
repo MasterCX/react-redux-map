@@ -70,6 +70,12 @@ export function filterSuccess(filteredData) {
     }
 }
 
+export function filterFail() {
+    return {
+        type: 'FILTER_FAIL'
+    }
+}
+
 export function cancelFilter() {
     return {
         type: 'CANCEL_FILTER'

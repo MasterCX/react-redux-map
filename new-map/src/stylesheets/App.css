@@ -63,6 +63,6 @@ html, body {
 
 .chart-container {
   min-width: 600px;
-  min-height: 400px;
+  min-height: 600px;
   text-align: center;
 }

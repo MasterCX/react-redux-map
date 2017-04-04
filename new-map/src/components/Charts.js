@@ -7,23 +7,20 @@ class Charts extends Component {
         super(props);
         this.state = {
             tabStatus: 0,
+            queryParams: this.props.queryParams
         }
     }
 
-    componentWillReceiveProps(nextProps) {
-        console.log('componentWillReceiveProps')
-        console.log(document.getElementById('chart-container'));
-    }
-
-    componentDidUpdate(){
-        console.log('componentDidUpdate')
-        console.log(document.getElementById('chart-container'));
-    }
-
     componentDidMount(){
-        console.log('componentDidMount')
-        console.log(document.getElementById('time-dist-container'));
-        this.timeDistributionChart(this.props.data);
+        //Check data source.
+        if(this.props.showFilterResults) {
+            //Check filteredData
+            this.timeDistributionChart(this.props.filteredData);
+            this.vehicleType(this.props.filteredData);
+        } else {
+            this.timeDistributionChart(this.props.data);
+            this.vehicleType(this.props.data);
+        }
     }
 
     /**
@@ -45,10 +42,8 @@ class Charts extends Component {
 
         //Prepare y axis data: yCount collision times in each hour.
         data.map(function(object) {
-            console.log(object.TIME)
             let hour = parseInt(object.TIME.split(":")[0]);
             yCountData[hour]++
-            console.log(yCountData[hour]);
             return true;
         })
 
@@ -95,22 +90,92 @@ class Charts extends Component {
         };
 
         let timeDistributionChart = window.echarts.init(document.getElementById('time-dist-container'));
-        timeDistributionChart.setOption(option); 
+        timeDistributionChart.setOption(option);
+        return true;
     }
 
     /**
      * Create vehicle type stastic chart.
      */
-    vehicleType = () => {
-        console.log('render')
-        console.log(document.getElementById('chart-container'));
+    vehicleType = (data) => {
+
     }
 
     /**
      * Create collision cause stastic chart.
      */
     collisionCause = (data) => {
+        let collisionCause = {},
+            formattedCause = [],
+            xTypes = [];
 
+        data.map(function(object) {
+            //If key 'factor' exists, value++, else set value = 1
+            collisionCause[object['CONTRIBUTING FACTOR VEHICLE 1']]
+                ? collisionCause[object['CONTRIBUTING FACTOR VEHICLE 1']]++
+                : collisionCause[object['CONTRIBUTING FACTOR VEHICLE 1']] = 1;
+            collisionCause[object['CONTRIBUTING FACTOR VEHICLE 2']]
+                ? collisionCause[object['CONTRIBUTING FACTOR VEHICLE 2']]++
+                : collisionCause[object['CONTRIBUTING FACTOR VEHICLE 2']] = 1;
+            collisionCause[object['CONTRIBUTING FACTOR VEHICLE 3']]
+                ? collisionCause[object['CONTRIBUTING FACTOR VEHICLE 3']]++
+                : collisionCause[object['CONTRIBUTING FACTOR VEHICLE 3']] = 1;
+            collisionCause[object['CONTRIBUTING FACTOR VEHICLE 4']]
+                ? collisionCause[object['CONTRIBUTING FACTOR VEHICLE 4']]++
+                : collisionCause[object['CONTRIBUTING FACTOR VEHICLE 4']] = 1;
+            collisionCause[object['CONTRIBUTING FACTOR VEHICLE 5']]
+                ? collisionCause[object['CONTRIBUTING FACTOR VEHICLE 5']]++
+                : collisionCause[object['CONTRIBUTING FACTOR VEHICLE 5']] = 1;
+        })
+        
+        for(let key in collisionCause) {
+            xTypes.push(key);
+            formattedCause.push({value: collisionCause[key], name: key});
+        }
+
+        let option = {
+            tooltip: {
+                trigger: 'item',
+                formatter: "{a} <br/>{b}: {c}({d}%)"
+            },
+            legend: {
+                orient: 'verticle',
+                x: 'left',
+                data: xTypes,
+            },
+            series: [
+                {
+                    name: '事故原因',
+                    type: 'pie',
+                    radius: ['50%', '70%'],
+                    avoidLabelOverlap: false,
+                    left: '20%',
+                    label: {
+                        normal: {
+                            show: false,
+                            position: 'center',
+                        },
+                        emphasis: {
+                            show: true,
+                            textStyle: {
+                                fontSize: '30',
+                                fontWeight: 'bold'
+                            }
+                        }
+                    },
+                    labelLine: {
+                        normal: {
+                            show: false
+                        }
+                    },
+                    data: formattedCause
+                }
+            ]
+        }
+
+        let collisionCauseChart = window.echarts.init(document.getElementById('collision-cause-container'));
+        collisionCauseChart.setOption(option);
+        return true;
     }
     render() {
         return (
@@ -119,7 +184,7 @@ class Charts extends Component {
                     <Tab label="事故日时间分布图">
                         <div>
                             <p className="distance-filter-tip">
-                                <strong>{this.props.queryParams.startDate}</strong>到<strong>{this.props.queryParams.dueDate}</strong>期间，指定范围内的事故发生时间的分布。事故高发时段请注意出行安全！
+                                指定范围内的事故发生时间的分布。事故高发时段请注意出行安全！
                             </p>
                             <div id="time-dist-container" className="chart-container">
                             </div>
@@ -128,7 +193,7 @@ class Charts extends Component {
                     <Tab label="事故车辆类型分布">
                         <div>
                             <p className="distance-filter-tip">
-                            当前数据中，事故当事车辆类型的统计。
+                                当前数据中，事故当事车辆类型的统计。
                             </p>
                             <div id="vehicle-type-container" className="chart-container">
                             </div>
@@ -137,7 +202,7 @@ class Charts extends Component {
                     <Tab label="事故原因统计">
                         <div>
                             <p className="distance-filter-tip">
-                            事故原因统计。
+                                事故原因统计。
                             </p>
                             <div id="collision-cause-container" className="chart-container">
                             </div>
