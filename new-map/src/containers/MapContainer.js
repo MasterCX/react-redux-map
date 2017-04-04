@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import { connect } from 'react-redux';
-import { cancelFilter } from '../actions/actions'
+import { cancelFilter, filterSuccess } from '../actions/actions'
 import LinearProgress from 'material-ui/LinearProgress';
 import Snackbar from 'material-ui/Snackbar';
 
@@ -27,6 +27,7 @@ const MAPCONFIG = {
 let map,
     circle,
     markers = [],
+    filteredData = [],
     radius,
     collisionDetail = new window.google.maps.InfoWindow({
         content: ''
@@ -190,6 +191,9 @@ class MapContainer extends Component {
                 ? this.showFilterData(nextProps)
                 : (removeCircle() && this.showQueryData(nextProps));
         }
+        //Update filtered data.
+        (filteredData && filteredData.length)
+            && this.props.dispatch(filterSuccess(filteredData));
     }
 
     /**
@@ -243,7 +247,10 @@ class MapContainer extends Component {
             markers.push(marker);
             return true;
         });
-    
+        
+        //After fetch new query results, reset filtered data.
+        filteredData = [];
+
         //Show tips when data records is more than 400.
         //If data is not empty then markers won't be empty.
         markers.length > 400
@@ -277,6 +284,9 @@ class MapContainer extends Component {
         //Clean screen.
         this.clearMarkers();
         
+        //Reset filtered data array.
+        filteredData = [];
+
         //For every data element, do:
         //1. transfer data to position
         //2. judge whether this position is in the circle
@@ -294,10 +304,14 @@ class MapContainer extends Component {
                     collisionDetail.open(map, marker);
                 });
                 markers.push(marker);
+                filteredData.push(object);
+                console.log(object.TIME);
+                console.log(typeof object.TIME);
             }
             return true;
         });
 
+        
         //Show tips when data records is more than 400.
         if(markers.length > 0) {
             markers.length > 400

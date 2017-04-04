@@ -5,17 +5,26 @@ import { emptyData, queryData, filterData, cancelFilter } from '../actions/actio
 import QueryByDate from '../components/QueryByDate';
 import QueryByBorough from '../components/QueryByBorough';
 import DistanceFilter from  '../components/DistanceFilter';
+import Charts from '../components/Charts';
 
+/**
+ * Container and item components.
+ */
 import Drawer from 'material-ui/Drawer';
 import AppBar from 'material-ui/AppBar';
+import IconMenu from 'material-ui/IconMenu';
+import MenuItem from 'material-ui/MenuItem';
+import Divider from 'material-ui/Divider';
+import Dialog from 'material-ui/Dialog';
+/**
+ * Button and icon components.
+ */
 import RaisedButton from 'material-ui/RaisedButton';
 import FloatingActionButton from 'material-ui/FloatingActionButton';
-import NavigationClose from 'material-ui/svg-icons/navigation/close';
 import IconButton from 'material-ui/IconButton';
+import FlatButton from 'material-ui/FlatButton';
 import ContentAdd from 'material-ui/svg-icons/content/add';
-import MenuItem from 'material-ui/MenuItem';
-import IconMenu from 'material-ui/IconMenu';
-import Divider from 'material-ui/Divider';
+import NavigationClose from 'material-ui/svg-icons/navigation/close';
 import ArrowDropRight from 'material-ui/svg-icons/navigation/chevron-left';
 
 
@@ -37,25 +46,28 @@ class MenuContainer extends Component {
         this.state = {
             queryContainerShow: false,
             filterContainerShow: false,
+            showStatistics: false,
             queryParams: this.props.queryParams,
             showFilterResults: this.props.showFilterResults
-        }
+        };
     }
 
-    handleToggleQuery = () => {this.setState({queryContainerShow: !this.state.queryContainerShow})}
+    handleToggleQuery = () => {this.setState({queryContainerShow: !this.state.queryContainerShow})};
 
-    handleToggleFilter = () => {this.setState({filterContainerShow: !this.state.filterContainerShow})}
+    handleToggleFilter = () => {this.setState({filterContainerShow: !this.state.filterContainerShow})};
+    
+    handleToggleStatistics= () => {this.setState({showStatistics:!this.state.showStatistics})};
 
-    handleEmpty = () => {this.props.dispatch(emptyData())}
+    handleEmpty = () => {this.props.dispatch(emptyData())};
      
-    handleQuery = () => {this.state.queryParams.boroughSelected.length !==0 && this.props.dispatch(queryData(this.state.queryParams))}
+    handleQuery = () => {this.state.queryParams.boroughSelected.length !==0 && this.props.dispatch(queryData(this.state.queryParams))};
 
-    handleFilter = () => {this.props.dispatch(filterData())}
+    handleFilter = () => {this.props.dispatch(filterData())};
 
-    cancelFilter = () => {this.props.dispatch(cancelFilter())}
+    cancelFilter = () => {this.props.dispatch(cancelFilter())};
 
     componentWillReceiveProps(nextProps) {
-        this.setState({queryParams: nextProps.queryParams, showFilterResults: nextProps.showFilterResults});
+        this.setState({queryParams: nextProps.queryParams});
     }
 
     render() {
@@ -104,14 +116,26 @@ class MenuContainer extends Component {
                      <MenuItem
                         primaryText="显示当前数据的统计图表"
                         leftIcon={<ArrowDropRight/>}
-                        menuItems={[
-                            <MenuItem primaryText="事故发生时间分布" />,
-                            <MenuItem primaryText="事故车辆类型" />,
-                            <MenuItem primaryText="发生事故原因" />
-                        ]}
+                        onTouchTap={this.handleToggleStatistics}
                      />
                      </IconMenu>
-                </div> 
+                </div>
+                <Dialog
+                    id="chart-container"
+                    title=" 统计图表"
+                    actions={
+                        <FlatButton
+                            label="关闭"
+                            primary={true}
+                            onTouchTap={this.handleToggleStatistics}
+                        />
+                    }
+                    modal={false}
+                    open={this.state.showStatistics}
+                    onRequestClose={this.handleToggleStatistics}
+                >
+                    <Charts/>
+                </Dialog>
             </div>
         );
     }

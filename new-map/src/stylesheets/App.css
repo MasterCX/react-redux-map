@@ -60,3 +60,10 @@ html, body {
   font-size: 12pt;
   padding: 5px;
 }
+
+.chart-container {
+  width: 80%;
+  height: 80%;
+  min-width: 600px;
+  min-height: 400px;
+}

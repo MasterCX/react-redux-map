@@ -63,9 +63,10 @@ export function filterData() {
     }
 }
 
-export function filterSuccess() {
+export function filterSuccess(filteredData) {
     return {
-        type: 'FILTER_SUCCESS'
+        type: 'FILTER_SUCCESS',
+        filteredData: filteredData
     }
 }
 

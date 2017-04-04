@@ -9,8 +9,10 @@ const initialState = {
     fetchingBoroughList: false,
     willEmpty: false,
     showFilterResults: false,
+    showStatistics: false,
     distanceFilterRadius: 0,
-    data: []
+    data: [],
+    filteredData: []
 }
 
 
@@ -55,13 +57,14 @@ function mapAppReducer(state=initialState, action) {
             });
         case 'FILTER_SUCCESS':
             return Object.assign({}, state, {
-                willEmpty: false
-            })
+                willEmpty: false,
+                filteredData: action.filteredData
+            });
         case 'CANCEL_FILTER':
             return Object.assign({}, state, {
                 showFilterResults: false,
                 willEmpty: true
-            })
+            });
         default:
             return state
     }
