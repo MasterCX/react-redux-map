@@ -30,7 +30,6 @@ class Charts extends Component {
      * Create collision time distribution stastic chart.
      */
     timeDistributionChart = (data) => {
-        console.log(data);
         let yCountData = new Array(24),
             xTimeData = new Array(24);
 
@@ -40,18 +39,24 @@ class Charts extends Component {
         }
 
         //Initialize yCountData
-        for(let i = 0; i < yCountData; i++) {
+        for(let i = 0; i < yCountData.length; i++) {
             yCountData[i] = 0
         }
 
         //Prepare y axis data: yCount collision times in each hour.
         data.map(function(object) {
+            console.log(object.TIME)
             let hour = parseInt(object.TIME.split(":")[0]);
             yCountData[hour]++
+            console.log(yCountData[hour]);
             return true;
         })
 
         let option = {
+            title: {
+                left: 'center',
+                text: '事故日时间分布统计'
+            },
             color: ['#3398DB'],
             tooltip: {
                 trigger: 'axis',
