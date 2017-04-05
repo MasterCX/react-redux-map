@@ -1,4 +1,4 @@
-# 知道创宇笔试题：地图APP
+# React-Redux实践：地图APP
 ## 说明
 ### 目录结构
 * `map-app`:
