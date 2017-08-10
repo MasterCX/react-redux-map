@@ -36,7 +36,7 @@ server.register({
     if (err) console.log(err);
 });
 ```
->**注意：如果使用`webpack-dev-server`调试，可能需要开启`hapi`服务器的跨域：
+>**注意：如果使用`webpack-dev-server`调试，可能需要开启`hapi`服务器的跨域：**
 ```js
 const server = new Hapi.Server({
     connections: {
@@ -54,7 +54,9 @@ node server.js
 ```
 然后访问[localhost:4000](http://localhost:4000)查看DEMO。
 在线DEMO可以访问[这里](http://123.206.110.199:4000)。
->**注意：由于使用了Google地图API，访问DEMO需要翻墙。**
+>**注意**：
+1. 由于使用了Google地图API，访问DEMO需要翻墙。
+2. 交通事故数据来源是纽约警察局公开数据，统计了2017年3月24日之前的数据。为确保可以显示数据，请确定筛选条件为**3月24日之前**。
 
 ### 基本功能特性
 1. 特性
